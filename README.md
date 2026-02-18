@@ -10,7 +10,7 @@ This project is intentionally small and readable: it’s designed to be easy to 
 - **Instant client-side filtering**: As you type in the search box, I filter the list by name (case-insensitive) and re-render the card grid.
 - **Reusable React components**: I keep UI pieces focused and composable (`Card`, `CardList`, `SearchBox`, `Scroll`).
 - **Loading state**: I render a simple “Loading…” state while the initial network request is in-flight.
-- **Error + retry + empty results states**: I show a retry button if the API request fails, and I display a “No robots found.” message when a search matches nothing.
+- **Resilient loading + search UX**: if the API request fails I fall back to local seed data and show a Retry button; and when a search matches nothing I display a “No robots found.” message.
 
 ## Design & UI Notes (First Person)
 
@@ -22,6 +22,7 @@ This project is intentionally small and readable: it’s designed to be easy to 
 ## Development & Engineering Highlights
 
 - **React 19 + StrictMode**: I render the app under `StrictMode` to catch unsafe patterns early.
+- **Hooks-based App**: `App` is implemented as a function component using hooks (`useEffect` for fetching, `useMemo` for filtering).
 - **Vite dev workflow**: fast startup, fast rebuilds, and a production build pipeline via `vite build`.
 - **ESLint configured**: a lightweight linting setup to keep code quality consistent.
 - **Tests (Vitest + Testing Library)**: basic component tests cover loading, filtering, empty results, and fallback/retry behavior.
@@ -33,8 +34,10 @@ This project is intentionally small and readable: it’s designed to be easy to 
 - `src/main.jsx`: React entry point (creates root, renders `App`, registers service worker)
 - `src/containers/App.jsx`: data fetching, search state, filtering, and layout
 - `src/containers/App.css`: SEGA font-face + `.sega-text` styling
+- `src/containers/App.test.jsx`: component tests (Vitest + Testing Library)
 - `src/components/`: presentational components
 - `src/index.css`: global background + layout basics
+- `src/test/setup.js`: test setup (jest-dom matchers + DOM cleanup)
 - `public/sw.js`: service worker file
 - `src/robots.js`: fallback robot seed data (used if the JSONPlaceholder request fails)
 
