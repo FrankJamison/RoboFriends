@@ -1,16 +1,64 @@
-# React + Vite
+# RoboFriends (React + Vite)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+I built RoboFriends as a clean, portfolio-friendly React app that demonstrates component-driven UI, client-side data fetching, fast search filtering, and a modern Vite-based developer workflow.
 
-Currently, two official plugins are available:
+This project is intentionally small and readable: it’s designed to be easy to extend (new components, new API data, new UI behavior) without introducing framework complexity.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## What I Built
 
-## React Compiler
+- **Searchable “robot friends” directory**: I fetch a list of users from `https://jsonplaceholder.typicode.com/users`, then render each as a card with a RoboHash avatar.
+- **Instant client-side filtering**: As you type in the search box, I filter the list by name (case-insensitive) and re-render the card grid.
+- **Reusable React components**: I keep UI pieces focused and composable (`Card`, `CardList`, `SearchBox`, `Scroll`).
+- **Loading state**: I render a simple “Loading…” state while the initial network request is in-flight.
+- **Error + retry + empty results states**: I show a retry button if the API request fails, and I display a “No robots found.” message when a search matches nothing.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Design & UI Notes (First Person)
 
-## Expanding the ESLint configuration
+- I use **Tachyons utility classes** to style quickly and consistently (spacing, layout, hover/grow effects, borders).
+- I apply a **full-page gradient background** and keep the layout centered to make the UI feel deliberate and polished.
+- I constrain the card list inside a **scrollable container** so the header + search input stays visible while browsing many cards.
+- I use a **custom SEGA-style header font** via `src/containers/SEGA.TTF` and the `.sega-text` class in `src/containers/App.css`.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Development & Engineering Highlights
+
+- **React 19 + StrictMode**: I render the app under `StrictMode` to catch unsafe patterns early.
+- **Vite dev workflow**: fast startup, fast rebuilds, and a production build pipeline via `vite build`.
+- **ESLint configured**: a lightweight linting setup to keep code quality consistent.
+- **Tests (Vitest + Testing Library)**: basic component tests cover loading, filtering, empty results, and fallback/retry behavior.
+- **Service worker caching**: I register a service worker on page load. It provides basic offline caching (cache-first for built/static assets, and network-first caching for the JSONPlaceholder users API). Note: the first visit still requires a network connection—offline support kicks in after the assets/API response have been cached.
+- **CSS build compatibility fix**: I vendor a cleaned Tachyons stylesheet (`src/tachyons-clean.css`) to remove legacy hack declarations (e.g. `*zoom`, `_display`) that modern CSS tooling can flag.
+
+## Project Structure
+
+- `src/main.jsx`: React entry point (creates root, renders `App`, registers service worker)
+- `src/containers/App.jsx`: data fetching, search state, filtering, and layout
+- `src/containers/App.css`: SEGA font-face + `.sega-text` styling
+- `src/components/`: presentational components
+- `src/index.css`: global background + layout basics
+- `public/sw.js`: service worker file
+- `src/robots.js`: fallback robot seed data (used if the JSONPlaceholder request fails)
+
+## Getting Started
+
+**Prereqs**
+- Node.js 18+ recommended
+
+**Install**
+- `npm install`
+
+**Run in development**
+- `npm run dev`
+
+**Build for production**
+- `npm run build`
+
+Vite outputs the production build to `dist/`.
+
+**Preview the production build**
+- `npm run preview`
+
+**Lint**
+- `npm run lint`
+
+**Tests**
+- `npm test`
