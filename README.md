@@ -1,67 +1,161 @@
-# RoboFriends (React + Vite)
+# RoboFriends
 
-I built RoboFriends as a clean, portfolio-friendly React app that demonstrates component-driven UI, client-side data fetching, fast search filtering, and a modern Vite-based developer workflow.
+A small React + Vite app that fetches a list of users and renders them as “robot friend” cards with fast client-side search.
 
-This project is intentionally small and readable: it’s designed to be easy to extend (new components, new API data, new UI behavior) without introducing framework complexity.
+- Live preview: https://robofriends.fcjamison.com/
 
-## What I Built
+## Features
 
-- **Searchable “robot friends” directory**: I fetch a list of users from `https://jsonplaceholder.typicode.com/users`, then render each as a card with a RoboHash avatar.
-- **Instant client-side filtering**: As you type in the search box, I filter the list by name (case-insensitive) and re-render the card grid.
-- **Reusable React components**: I keep UI pieces focused and composable (`Card`, `CardList`, `SearchBox`, `Scroll`).
-- **Loading state**: I render a simple “Loading…” state while the initial network request is in-flight.
-- **Resilient loading + search UX**: if the API request fails I fall back to local seed data and show a Retry button; and when a search matches nothing I display a “No robots found.” message.
+- Fetches users from `https://jsonplaceholder.typicode.com/users`
+- Renders cards with avatars from `https://robohash.org/<id>?200x200`
+- Case-insensitive search filtering by name
+- Loading state while the initial request is in flight
+- Failure handling: falls back to local seed data and shows a Retry button
+- Empty state: “No robots found.” when a search matches nothing
 
-## Design & UI Notes (First Person)
+## Tech Stack
 
-- I use **Tachyons utility classes** to style quickly and consistently (spacing, layout, hover/grow effects, borders).
-- I apply a **full-page gradient background** and keep the layout centered to make the UI feel deliberate and polished.
-- I constrain the card list inside a **scrollable container** so the header + search input stays visible while browsing many cards.
-- I use a **custom SEGA-style header font** via `src/containers/SEGA.TTF` and the `.sega-text` class in `src/containers/App.css`.
+- React 19
+- Vite (dev server + build)
+- Tachyons for utility-first styling (vendored as `src/tachyons-clean.css`)
+- ESLint (flat config)
+- Vitest + Testing Library (React, user-event)
+- Custom service worker for lightweight offline caching (`public/sw.js`)
 
-## Development & Engineering Highlights
+## Quickstart
 
-- **React 19 + StrictMode**: I render the app under `StrictMode` to catch unsafe patterns early.
-- **Hooks-based App**: `App` is implemented as a function component using hooks (`useEffect` for fetching, `useMemo` for filtering).
-- **Vite dev workflow**: fast startup, fast rebuilds, and a production build pipeline via `vite build`.
-- **ESLint configured**: a lightweight linting setup to keep code quality consistent.
-- **Tests (Vitest + Testing Library)**: basic component tests cover loading, filtering, empty results, and fallback/retry behavior.
-- **Service worker caching**: I register a service worker on page load. It provides basic offline caching (cache-first for built/static assets, and network-first caching for the JSONPlaceholder users API). Note: the first visit still requires a network connection—offline support kicks in after the assets/API response have been cached.
-- **CSS build compatibility fix**: I vendor a cleaned Tachyons stylesheet (`src/tachyons-clean.css`) to remove legacy hack declarations (e.g. `*zoom`, `_display`) that modern CSS tooling can flag.
+### Prerequisites
 
-## Project Structure
+- Node.js 18+ (20+ also works)
 
-- `src/main.jsx`: React entry point (creates root, renders `App`, registers service worker)
-- `src/containers/App.jsx`: data fetching, search state, filtering, and layout
-- `src/containers/App.css`: SEGA font-face + `.sega-text` styling
-- `src/containers/App.test.jsx`: component tests (Vitest + Testing Library)
-- `src/components/`: presentational components
-- `src/index.css`: global background + layout basics
-- `src/test/setup.js`: test setup (jest-dom matchers + DOM cleanup)
-- `public/sw.js`: service worker file
-- `src/robots.js`: fallback robot seed data (used if the JSONPlaceholder request fails)
+### Install
 
-## Getting Started
+```bash
+npm install
+```
 
-**Prereqs**
-- Node.js 18+ recommended
+### Run (dev)
 
-**Install**
-- `npm install`
+```bash
+npm run dev
+```
 
-**Run in development**
-- `npm run dev`
+Vite prints the local URL in the terminal (typically `http://localhost:5173`).
 
-**Build for production**
-- `npm run build`
+If you have a local domain set up for this project, you can also use:
 
-Vite outputs the production build to `dist/`.
+- `http://robofriends.localhost:5173/`
 
-**Preview the production build**
-- `npm run preview`
+### Build (prod)
 
-**Lint**
-- `npm run lint`
+```bash
+npm run build
+```
 
-**Tests**
-- `npm test`
+Build output is written to `dist/`.
+
+### Preview (prod build locally)
+
+```bash
+npm run preview
+```
+
+### Lint
+
+```bash
+npm run lint
+```
+
+### Test
+
+```bash
+npm test
+```
+
+Note: `npm test` runs `vitest run` (single run). For watch mode you can use `npx vitest`.
+
+## NPM Scripts
+
+| Command           | What it does                          |
+| ----------------- | ------------------------------------- |
+| `npm run dev`     | Starts the Vite dev server            |
+| `npm run build`   | Creates a production build in `dist/` |
+| `npm run preview` | Serves the production build locally   |
+| `npm run lint`    | Runs ESLint across the repo           |
+| `npm test`        | Runs the test suite once (Vitest)     |
+
+## VS Code Tasks
+
+This repo includes a couple of convenience tasks in `.vscode/tasks.json`:
+
+- **npm: install + dev** — runs `npm install` and then starts `npm run dev`
+- **Open in Browser (robofriends.localhost)** — opens `http://robofriends.localhost:5173/`
+
+Run them via **Terminal → Run Task…**.
+
+## Project Layout
+
+- `index.html` — HTML shell and Vite entry
+- `src/main.jsx` — React entry point; renders `App` and registers the service worker
+- `src/containers/App.jsx` — data fetching, search state, filtering, and page layout
+- `src/components/` — presentational components (`Card`, `CardList`, `SearchBox`, `Scroll`)
+- `src/robots.js` — fallback seed data (used if the API request fails)
+- `src/test/setup.js` — test setup for jest-dom matchers
+- `src/containers/App.test.jsx` — app behavior tests
+- `public/sw.js` — service worker implementation
+
+## How It Works (High Level)
+
+1. `App` fetches users from JSONPlaceholder on mount.
+2. If the request succeeds, the response is stored in local state (`robots`).
+3. If the request fails, the UI switches to fallback data (`src/robots.js`) and shows an error banner + Retry button.
+4. The search input updates `searchField`; filtered results are derived with `useMemo`.
+5. `CardList` renders one `Card` per robot, and each card uses RoboHash for its image.
+
+## Service Worker / Offline Caching
+
+This repo registers a service worker on page load (`src/registerServiceWorker.js`) that is served from `public/sw.js`.
+
+Caching strategy in `public/sw.js`:
+
+- App navigations (`request.mode === 'navigate'`): **network-first**, falls back to cached `index.html`
+- Built/static assets (e.g. `/assets/*`, scripts/styles/fonts/images): **cache-first**
+- Users API (`https://jsonplaceholder.typicode.com/users`): **network-first** with a cache fallback
+
+Operational notes:
+
+- First visit still needs the network; offline support improves after resources are cached.
+- If you change caching behavior, bump `CACHE_VERSION` in `public/sw.js` to invalidate old caches.
+- If the app behaves “stuck” after a deploy (common with service workers), unregister the service worker and clear site data in your browser devtools, then reload.
+
+## Testing
+
+Tests live in `src/containers/App.test.jsx` and cover:
+
+- initial loading state
+- rendering data from the API
+- search filtering and empty state
+- fallback data + retry flow when the API fails
+
+Vitest is configured in `vite.config.js` with:
+
+- `environment: 'jsdom'`
+- `setupFiles: './src/test/setup.js'`
+
+## Linting
+
+ESLint is configured via `eslint.config.js` (flat config) and is run with `npm run lint`.
+
+## Configuration Notes
+
+- API endpoint lives in `src/containers/App.jsx` (`requestRobots`).
+- The browser tab title is set in `index.html` (currently `robofriends`).
+
+## Deployment
+
+`npm run build` produces a static site in `dist/` that can be hosted on any static hosting provider.
+
+Service worker reminders:
+
+- Service workers require HTTPS in production (or `http://localhost` for local dev).
+- `sw.js` is registered from the site root (`/sw.js`), so your hosting should serve it at that path.
